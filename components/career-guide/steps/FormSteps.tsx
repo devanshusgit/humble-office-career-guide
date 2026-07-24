@@ -261,8 +261,8 @@ export const ContactAndPhotoStep = () => {
       </div>
       
       <div>
-        <Label>Profile Photograph *</Label>
-        <p className="text-xs text-slate-500 mb-2">Used only for your guide&apos;s cover page. Max 5MB (JPEG/PNG/WebP).</p>
+        <Label>Profile Photograph (Optional)</Label>
+        <p className="text-xs text-slate-500 mb-2">Used for your guide&apos;s cover page. Max 5MB (JPEG/PNG/WebP).</p>
         <Input type="file" accept="image/jpeg,image/png,image/webp" onChange={handleFileChange} />
         {photo && <p className="text-sm mt-1 text-green-600">Selected: {photo.name}</p>}
       </div>

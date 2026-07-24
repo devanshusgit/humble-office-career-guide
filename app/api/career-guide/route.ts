@@ -29,12 +29,12 @@ export async function POST(req: NextRequest) {
     const photoFile = formData.get('photo') as File | null;
     const rawData = formData.get('data') as string | null;
 
-    if (!photoFile || !rawData) {
+    if (!rawData) {
       return NextResponse.json({ error: 'Missing required fields' }, { status: 400 });
     }
 
-    // 3. Validate Photo
-    if (!validateFile(photoFile, env.PHOTO_MAX_SIZE_MB)) {
+    // 3. Validate Photo (if provided)
+    if (photoFile && !validateFile(photoFile, env.PHOTO_MAX_SIZE_MB)) {
       return NextResponse.json(
         { error: 'Invalid photograph. Please upload a JPEG, PNG or WebP under the size limit.' },
         { status: 400 }
@@ -49,12 +49,14 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: 'Malformed JSON data' }, { status: 400 });
     }
 
-    // 5. Upload Photo
-    const fileExt = photoFile.name.split('.').pop();
-    const fileName = `${crypto.randomUUID()}.${fileExt}`;
-    const arrayBuffer = await photoFile.arrayBuffer();
-    const photoPath = await uploadPhoto(Buffer.from(arrayBuffer), fileName, photoFile.type);
-    parsedData.photo_path = photoPath;
+    // 5. Upload Photo (if provided)
+    if (photoFile) {
+      const fileExt = photoFile.name.split('.').pop();
+      const fileName = `${crypto.randomUUID()}.${fileExt}`;
+      const arrayBuffer = await photoFile.arrayBuffer();
+      const photoPath = await uploadPhoto(Buffer.from(arrayBuffer), fileName, photoFile.type);
+      parsedData.photo_path = photoPath;
+    }
 
     // 6. Create Pending Submission in Supabase
     let submissionId: string;
@@ -86,8 +88,12 @@ export async function POST(req: NextRequest) {
     // 8. Generate PDF
     let pdfBuffer;
     try {
-      const base64 = Buffer.from(arrayBuffer).toString('base64');
-      const dataUri = `data:${photoFile.type};base64,${base64}`;
+      let dataUri = undefined;
+      if (photoFile) {
+        const arrayBuffer = await photoFile.arrayBuffer();
+        const base64 = Buffer.from(arrayBuffer).toString('base64');
+        dataUri = `data:${photoFile.type};base64,${base64}`;
+      }
       pdfBuffer = await generatePDFBuffer(aiResult, dataUri, submissionId);
     } catch (pdfError) {
       console.error('PDF generation error:', pdfError);
