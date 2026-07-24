@@ -114,10 +114,9 @@ export function CareerGuideExperience() {
       const formData = new FormData();
       
       const photo = data.photo as File;
-      if (!photo) {
-        throw new Error('Photograph is required.');
+      if (photo) {
+        formData.append('photo', photo);
       }
-      formData.append('photo', photo);
       
       const payload = { ...data };
       delete payload.photo;
