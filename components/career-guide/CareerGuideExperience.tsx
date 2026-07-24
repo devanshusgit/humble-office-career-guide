@@ -143,6 +143,20 @@ export function CareerGuideExperience() {
     }
   };
 
+  const onFormError = (errors: any) => {
+    console.error('Form validation blocked submission:', errors);
+    const errorMessages = Object.values(errors)
+      .map((e: any) => e.message)
+      .filter(Boolean) as string[];
+      
+    if (errorMessages.length > 0) {
+      setSubmitError(`Validation Error: ${errorMessages[0]}`);
+    } else {
+      setSubmitError('Please fill out all required fields on previous steps.');
+    }
+    window.scrollTo(0, 0);
+  };
+
   if (successData) {
     return <SubmissionSuccess email={successData.email} submissionId={successData.submissionId} />;
   }
@@ -173,7 +187,7 @@ export function CareerGuideExperience() {
       )}
 
       <FormProvider {...methods}>
-        <form onSubmit={methods.handleSubmit(onSubmit)} className="space-y-8">
+        <form onSubmit={methods.handleSubmit(onSubmit, onFormError)} className="space-y-8">
           
           {currentStep === 0 && <PersonalDetailsStep />}
           {currentStep === 1 && <EducationStep />}
